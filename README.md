@@ -1,6 +1,9 @@
 # Spark Cluster Setup with Docker
+![image](https://github.com/user-attachments/assets/69063391-b9b5-4d9d-ba0b-406ba60056f6)
+
 Docker Compose를 사용하여 Apache Spark 클러스터(Master, Worker, Spark-Submit)를 설정하고 관리한다.  
 docker-compose.yml 파일을 통해 Spark 클러스터를 실행하고, PySpark 스크립트를 Spark 클러스터에서 자동으로 실행한다.
+
 
 ## 실행 요구사항
 - [Docker 설치](https://docs.docker.com/desktop/)
@@ -11,7 +14,7 @@ docker --version
 ```
 docker compose version
 ```
-- app 폴더에 실행할 PySpark 스크립트
+- app 폴더에 실행할 PySpark 스크립트 (app/pyspark_test.py)
 
 ## 사용법
 1.  Docker Compose로 Spark 클러스터 시작

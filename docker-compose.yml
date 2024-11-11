@@ -1,5 +1,3 @@
-version: "3"
-
 services:
 
   spark-master:  # Spark 마스터 서비스 정의

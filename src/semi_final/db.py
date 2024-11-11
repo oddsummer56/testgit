@@ -8,5 +8,4 @@ def get_conn():
                             database='ticket',
                             port= int(os.getenv('DB_PORT', 53306)),
                             cursorclass=pymysql.cursors.DictCursor)
-
     return conn

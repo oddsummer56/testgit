@@ -21,11 +21,10 @@ def fetch_ticket_data():
 
 start = time.time()
 
-for i in tqdm(range(5)):
-    ticket_data = fetch_ticket_data()
-    producer.send('tickets', value=ticket_data)
-    producer.flush()
-    time.sleep(1) # 1초 간격으로 전송
+ticket_data = fetch_ticket_data()
+producer.send('tickets', value=ticket_data)
+producer.flush()
+time.sleep(1) # 1초 간격으로 전송
 
 end = time.time()
 print("[DONE]:", end-start)

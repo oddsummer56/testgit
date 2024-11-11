@@ -1,0 +1,24 @@
+[project]
+name = "semi_final"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "sunwoo", email = "summerham22@gmail.com"},
+]
+dependencies = [
+				"tqdm>=4.67.0",
+				"kafka-python>=2.0.2"
+				]
+requires-python = "==3.11.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = true
+
+[dependency-groups]
+test = ["pytest>=8.3.3"]
+
+[tool.pytest.ini_options]
+pythonpath = "src"

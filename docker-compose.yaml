@@ -5,12 +5,9 @@ services:
     container_name: tut-mariadb
     restart: always
     environment: # 환경변수
-      MARIADB_ROOT_PASSWORD: tut1234
-      MARIADB_USER: tut
-      MARIADB_PASSWORD: tut1234
-      MARIADB_DATABASE: ticket
       TZ: Asia/Seoul
     volumes:
       - ./db/initdb.d:/docker-entrypoint-initdb.d
+    env_file: .env
     ports:
       - 6033:3306 # 3306

@@ -1,0 +1,4 @@
+kafka-python        # Kafka 클라이언트 라이브러리
+pymysql             # MySQL/MariaDB 연결 라이브러리
+PyYAML              # YAML 파일 파싱 라이브러리
+

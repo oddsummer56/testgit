@@ -1,0 +1,87 @@
+services:
+  producer:
+    build: .                   # Dockerfile로 이미지 빌드
+    image: kafka-producer
+    container_name: kafka-producer
+    working_dir: /app
+    volumes:
+      - ./src/semi_final:/app
+      - ./kafka-config.yaml:/app/kafka-config.yaml
+    environment:
+      - KAFKA_CONFIG=/app/kafka-config.yaml
+    command: python /app/pro.py
+    depends_on:
+      - kafka
+        #- zookeeper
+        #- consumer
+    restart: on-failure
+    networks:
+      - kafka_network
+
+
+  consumer:
+    build: .
+    image: kafka-consumer
+    container_name: kafka-consumer
+    working_dir: /app
+    volumes:
+      - ./src/semi_final:/app
+      - ./kafka-config.yaml:/app/kafka-config.yaml
+    environment:
+      - KAFKA_CONFIG=/app/kafka-config.yaml
+    command: python /app/con.py
+    depends_on:
+      - kafka
+      - database
+    restart: on-failure
+    networks:
+      - kafka_network
+
+
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    networks:
+      - kafka_network
+
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    container_name: zookeeper
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
+    networks:
+      - kafka_network
+
+
+  database:
+    image: mariadb:latest
+    container_name: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_DATABASE: ticket
+      MYSQL_USER: tut
+      MYSQL_PASSWORD: tut1234
+    ports:
+      - "53306:3306"
+    volumes:
+      #- db_data:/var/lib/mysql
+      - ./db-init:/docker-entrypoint-initdb.d  # 초기화 스크립트 마운트
+    networks:
+      - kafka_network
+
+networks:
+  kafka_network:
+    driver: bridge
+

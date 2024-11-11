@@ -1,10 +1,16 @@
 from kafka import KafkaProducer
 import time
 import json
-from tqdm import tqdm
+import yaml
+
+# YAML 설정 파일 불러오기
+with open("/app/kafka-config.yaml", 'r') as f:
+    config = yaml.safe_load(f)
+
+producer_config = config['kafka']['producer']
 
 producer = KafkaProducer(
-        bootstrap_servers=['localhost:9092'],
+        bootstrap_servers=producer_config['bootstrap_servers'],
         value_serializer=lambda x:json.dumps(x).encode('utf-8')
 )
 
@@ -22,7 +28,7 @@ def fetch_ticket_data():
 start = time.time()
 
 ticket_data = fetch_ticket_data()
-producer.send('tickets', value=ticket_data)
+producer.send(producer_config['topic'], value=ticket_data)
 producer.flush()
 time.sleep(1) # 1초 간격으로 전송
 

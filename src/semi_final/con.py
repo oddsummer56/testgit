@@ -2,16 +2,22 @@ from kafka import KafkaConsumer, TopicPartition
 from json import loads
 import os
 from db import get_conn
+import yaml
+
+# YAML 설정 파일 불러오기
+with open("/app/kafka-config.yaml", 'r') as f:
+    config = yaml.safe_load(f)
+
+consumer_config = config['kafka']['consumer']
 
 consumer = KafkaConsumer(
-        "tickets",
-        bootstrap_servers=['localhost:9092'],
-        value_deserializer=lambda x: loads(x.decode('utf-8')),
-        consumer_timeout_ms=30000,
-        auto_offset_reset='earliest',
-        group_id="ticket",
-        enable_auto_commit=False,
-)
+        consumer_config['topics'][0],
+        bootstrap_servers=consumer_config['bootstrap_servers'],
+        group_id=consumer_config['group_id'],
+        auto_offset_reset=consumer_config['auto_offset_reset'],
+        enable_auto_commit=consumer_config['enable_auto_commit'],
+        value_deserializer=lambda x: loads(x.decode('utf-8'))
+        )
 
 print('[Start] get consumer')
 

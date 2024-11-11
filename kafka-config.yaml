@@ -1,0 +1,15 @@
+kafka:
+  producer:
+    bootstrap_servers: "kafka:9092"
+    topic: "tickets"
+    retries: 3
+    acks: "all"
+
+  consumer:
+    bootstrap_servers: "kafka:9092"
+    group_id: "ticket"
+    topics:
+      - "tickets"
+    auto_offset_reset: "earliest"
+    enable_auto_commit: false
+

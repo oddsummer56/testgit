@@ -1,12 +1,12 @@
 kafka:
   producer:
-    bootstrap_servers: "kafka:9092"
+    bootstrap_servers: "kafka1:9092"
     topic: "tickets"
     retries: 3
     acks: "all"
 
   consumer:
-    bootstrap_servers: "kafka:9092"
+    bootstrap_servers: "kafka1:9092"
     group_id: "ticket"
     topics:
       - "tickets"

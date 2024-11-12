@@ -24,6 +24,7 @@ def create_kafka_consumer(retries=5, delay=5):
                     )
             print("Kafka Consumer 연결 성공")
             return consumer
+
         except Exception as e:
             print(f"Kafka 브로커가 준비되지 않음. {delay}초 후 다시 시도 ({attempt+1}/{retries})")
             sleep(delay)
@@ -32,16 +33,16 @@ def create_kafka_consumer(retries=5, delay=5):
     return None
 
 
-# DB 연결 및 커서 생성
-conn = get_conn()
-cursor = conn.cursor()
-
 # 컨슈머 생성 시도
 consumer = create_kafka_consumer()
 
 if consumer:
     print('[Start] get consumer')
     try:
+        # 데이터베이스 연결 초기화
+        conn = get_conn()
+        cursor = conn.cursor()
+
         # Kafka 메시지 수신 및 데이터베이스 저장 루프
         for message in consumer:
             ticket_data = message.value
@@ -55,6 +56,7 @@ if consumer:
                     conn = get_conn()
                     cursor = conn.cursor()
 
+                # 데이터베이스에 데이터 삽입
                 cursor.execute(
                     '''
                     INSERT INTO ticket_data (event_name, price, date, location, available_tickets)
@@ -64,13 +66,16 @@ if consumer:
                 )
                 conn.commit()  # 각 메시지 처리 후 커밋하여 DB에 반영
                 print("Data saved to database.")
+
                 # 오프셋 수동 커밋
-                consumer.commit()
+                consumer.commit()  # 메시지가 정상적으로 처리된 후에만 커밋
 
             except Exception as e:
                 print(f"Error occurred while inserting data: {e}")
                 conn.rollback()  # 오류 시 롤백하여 데이터 정합성 유지
 
+    except KeyboardInterrupt:
+        print("Consumer stopped by user.")
     finally:
         # Consumer와 DB 연결 닫기
         consumer.close()
@@ -83,3 +88,4 @@ if consumer:
 
 else:
     print("컨슈머 연결 실패로 종료")
+

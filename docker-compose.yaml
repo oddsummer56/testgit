@@ -89,6 +89,8 @@ services:
       - ./kafka-config.yaml:/app/kafka-config.yaml
     environment:
       - KAFKA_CONFIG=/app/kafka-config.yaml
+      - DB_USER=${DB_USER}   # 환경 변수로 DB_USER 사용
+      - DB_PASSWORD=${DB_PASSWORD}   # 환경 변수로 DB_PASSWORD 사용
     command: python /app/con.py
     depends_on:
       - kafka1

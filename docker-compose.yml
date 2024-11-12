@@ -2,23 +2,22 @@ services:
 
   spark-master:  # Spark 마스터 서비스 정의
     image: apache/spark:latest  
-    container_name: spark-master  
+    container_name: spark-master
     command:
       - "/bin/sh"
       - "-c"
-      - /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master &&
-        --conf spark.metrics.conf.*.sink.prometheusServlet.class=org.apache.spark.metrics.sink.PrometheusServlet
-        --conf spark.metrics.conf.*.sink.prometheusServlet.path=/metrics
-        --conf spark.metrics.conf.*.sink.prometheusServlet.port=4040
+      - "/opt/spark/bin/spark-class org.apache.spark.deploy.master.Master && --conf spark.metrics.conf.*.sink.prometheusServlet.class=org.apache.spark.metrics.sink.PrometheusServlet && --conf spark.metrics.conf.*.sink.prometheusServlet.path=/metrics/prometheus && --conf spark.metrics.conf.*.sink.prometheusServlet.port=4041"
     environment:  
       - SPARK_MASTER_HOST=spark-master
       - SPARK_DRIVER_MEMORY=1G  # 마스터의 메모리를 1GB로 설정
+      - TZ=Asia/Seoul
     ports:
       - "8080:8080"  # 로컬 포트 8080을 컨테이너의 포트 8080과 연결 (Spark Web UI)
       - "7077:7077"  # 로컬 포트 7077을 컨테이너의 포트 7077과 연결 (Spark 마스터 포트)
-      - "4040:4040"
+      - "4041:4041"  # 로컬 포트 4040을 컨테이너의 포트 4040과 연결 (soark metric port)
+      - "4040:4040"  # 로컬 포트 4040을 컨테이너의 포트 4040과 연결 (soark metric port)
     networks:
-      - spark-net  # 'spark-net' 네트워크에 연결하여 Spark 클러스터 내부 통신
+      - spark-net
 
   spark-worker:  # Spark 워커 서비스 정의
     image: apache/spark:latest
@@ -27,6 +26,7 @@ services:
       - SPARK_MASTER=spark://spark-master:7077
       - SPARK_WORKER_CORES=1  # 워커가 사용할 CPU 코어 수를 1개로 제한
       - SPARK_WORKER_MEMORY=1G  # 워커가 사용할 메모리를 1GB로 제한
+      - TZ=Asia/Seoul
     depends_on:
       - spark-master  # spark-master 서비스가 먼저 시작되도록 지정
     networks:
@@ -37,6 +37,8 @@ services:
   spark-submit:  # Spark Submit 서비스 정의
     image: apache/spark:latest
     container_name: spark-submit
+    environment:
+      - TZ=Asia/Seoul
     networks:
       - spark-net  # 'spark-net' 네트워크에 연결하여 Spark 클러스터 내부 통신
     depends_on:
@@ -44,12 +46,15 @@ services:
       - spark-worker
     volumes:
       - ./app:/app  # 로컬 디렉토리 'app'을 컨테이너의 '/app' 경로에 연결하여 PySpark 스크립트를 사용할 수 있게 설정
+
     entrypoint:  # 컨테이너가 시작될 때 자동으로 실행할 명령어 지정
       - "/opt/spark/bin/spark-submit"
       - "--master"
       - "spark://spark-master:7077"  # Spark 마스터의 URL을 지정하여 Spark 클러스터 모드에서 실행
+        #- "--conf"
       - "--conf"
-      - "spark.jars.ivy=/tmp/.ivy2"  # Ivy 캐시 경로를 /tmp/.ivy2로 설정하여 의존성 문제를 방지
+      - " spark.ui.prometheus.enabled=true"
+        #- "spark.jars.ivy=/tmp/.ivy2"  # Ivy 캐시 경로를 /tmp/.ivy2로 설정하여 의존성 문제를 방지
       - "--executor-memory"
       - "512M"  # Executor 메모리를 512MB로 제한
       - "--total-executor-cores"
@@ -57,7 +62,36 @@ services:
       - "--num-executors"
       - "1"  # Executor의 수를 1개로 설정
       - "/app/pyspark_test.py"  # 실행할 PySpark 스크립트 파일 경로를 지정
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"  # Prometheus Web UI
+    environment:
+      - TZ=Asia/Seoul
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml  # Prometheus 설정 파일
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - spark-net  # 동일한 네트워크
+    restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # Grafana 관리자 비밀번호
+      - TZ=Asia/Seoul # 호스트와 동일 시간대로 설정
+    ports:
+      - "3001:3000"  # Grafana Web UI
+    depends_on:
+      - prometheus
+    networks:
+      - spark-net  # 동일한 네트워크
+    restart: always
 
 networks:  # 서비스 간의 통신을 위한 네트워크 설정
-  spark-net:  # 네트워크 이름을 'spark-net'로 지정
-    driver: bridge  # 네트워크 드라이버로 'bridge'를 사용하여 컨테이너 간 연결을 설정
+  spark-net: # 네트워크 이름을 'spark-net'로 지정
+    driver: bridge

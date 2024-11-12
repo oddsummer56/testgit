@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
+import time
 
 # SparkSession 생성
 spark = SparkSession.builder \
@@ -21,6 +22,8 @@ df.show()
 filtered_df = df.filter(col("Age") >= 30)
 print("나이가 30 이상인 사람들:")
 filtered_df.show()
+
+time.sleep(600)
 
 # SparkSession 종료
 spark.stop()

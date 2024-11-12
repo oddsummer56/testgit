@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s  # Prometheus가 메트릭을 수집하는 주기
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']  # Prometheus 자체의 메트릭스
+
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka-exporter:9308']  # Kafka Exporter 메트릭스
+
+

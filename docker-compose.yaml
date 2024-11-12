@@ -4,15 +4,17 @@ services:
     container_name: kafka1
     environment:
       - KAFKA_BROKER_ID=1
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper1:2181,zookeeper2:2181,zookeeper3:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka1:9092
-      - KAFKA_CFG_MIN_INSYNC_REPLICAS=2  # min.insync.replicas 설정 추가
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=2
     ports:
       - "9092:9092"
     depends_on:
-      - zookeeper
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
     networks:
       - kafka_network
 
@@ -21,15 +23,17 @@ services:
     container_name: kafka2
     environment:
       - KAFKA_BROKER_ID=2
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper1:2181,zookeeper2:2181,zookeeper3:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9093
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka2:9093
-      - KAFKA_CFG_MIN_INSYNC_REPLICAS=2  # 모든 브로커에 동일하게 설정
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=2
     ports:
       - "9093:9093"
     depends_on:
-      - zookeeper
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
     networks:
       - kafka_network
 
@@ -38,28 +42,56 @@ services:
     container_name: kafka3
     environment:
       - KAFKA_BROKER_ID=3
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper1:2181,zookeeper2:2181,zookeeper3:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9094
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka3:9094
-      - KAFKA_CFG_MIN_INSYNC_REPLICAS=2  # 모든 브로커에 동일하게 설정
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=2
     ports:
       - "9094:9094"
     depends_on:
-      - zookeeper
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
     networks:
       - kafka_network
 
-  zookeeper:
+  zookeeper1:
     image: bitnami/zookeeper:latest
-    container_name: zookeeper
+    container_name: zookeeper1
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOO_MY_ID=1
+      - ZOO_SERVERS=0.0.0.0:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
     ports:
       - "2181:2181"
     networks:
       - kafka_network
-  
+
+  zookeeper2:
+    image: bitnami/zookeeper:latest
+    container_name: zookeeper2
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOO_MY_ID=2
+      - ZOO_SERVERS=zookeeper1:2888:3888;0.0.0.0:2888:3888;zookeeper3:2888:3888
+    ports:
+      - "2182:2181"
+    networks:
+      - kafka_network
+
+  zookeeper3:
+    image: bitnami/zookeeper:latest
+    container_name: zookeeper3
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOO_MY_ID=3
+      - ZOO_SERVERS=zookeeper1:2888:3888;zookeeper2:2888:3888;0.0.0.0:2888:3888
+    ports:
+      - "2183:2181"
+    networks:
+      - kafka_network
+
   producer:
     build: .                   # Dockerfile로 이미지 빌드
     image: kafka-producer

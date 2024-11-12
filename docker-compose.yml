@@ -3,13 +3,20 @@ services:
   spark-master:  # Spark 마스터 서비스 정의
     image: apache/spark:latest  
     container_name: spark-master  
-    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master -h spark-master
+    command:
+      - "/bin/sh"
+      - "-c"
+      - /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master &&
+        --conf spark.metrics.conf.*.sink.prometheusServlet.class=org.apache.spark.metrics.sink.PrometheusServlet
+        --conf spark.metrics.conf.*.sink.prometheusServlet.path=/metrics
+        --conf spark.metrics.conf.*.sink.prometheusServlet.port=4040
     environment:  
       - SPARK_MASTER_HOST=spark-master
       - SPARK_DRIVER_MEMORY=1G  # 마스터의 메모리를 1GB로 설정
     ports:
       - "8080:8080"  # 로컬 포트 8080을 컨테이너의 포트 8080과 연결 (Spark Web UI)
       - "7077:7077"  # 로컬 포트 7077을 컨테이너의 포트 7077과 연결 (Spark 마스터 포트)
+      - "4040:4040"
     networks:
       - spark-net  # 'spark-net' 네트워크에 연결하여 Spark 클러스터 내부 통신
 

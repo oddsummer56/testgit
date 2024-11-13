@@ -1,5 +1,5 @@
 # Kafka 클러스터 및 프로듀서, 컨슈머 설정
-이 프로젝트에서는 Docker Compose를 사용하여 Kafka 브로커 3개, Zookeeper 3개, Kafka 프로듀서 및 Kafka 컨슈머를 설정합니다. 이 구성은 분산 메시징 시스템인 Kafka를 여러 브로커와 Zookeeper 인스턴스에서 실행하며, 데이터를 생성하고 소비할 수 있는 프로듀서와 컨슈머를 포함합니다.
+이 프로젝트에서는 Docker Compose를 사용하여 Kafka 브로커 3개, Zookeeper 3개, Kafka 프로듀서 및 Kafka 컨슈머를 설정합니다. 이 구성은 분산 메시징 시스템인 Kafka를 여러 브로커와 Zookeeper 인스턴스에서 실행하며, 데이터를 생성하고 소비할 수 있는 프로듀서와 컨슈머를 포함합니다. 컨슈머는 Kafka에서 읽은 데이터를 MariaDB에 저장합니다.
 <b></b>
 
 ## 프로젝트 구성

@@ -19,12 +19,12 @@ def list2df():
 
 t=time()
 
-st.title("Dashboard")
+st.title("Spark Resource Usage")
 
 row1 = st.empty()
 row2 = st.empty()
 row3 = st.empty()
-l,r = row3.columns([1,2])
+l,r = row3.columns([4.5,1])
 row4 = st.empty()
 
 

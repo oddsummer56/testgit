@@ -3,6 +3,7 @@ import subprocess
 from configparser import ConfigParser
 import os
 from datetime import datetime
+from tz_kst import now
 
 
 # PDM 프로젝트 PYPI.ORG 배포 및 CMD 형태로 설치 되도록
@@ -80,15 +81,21 @@ def do_scale(method,worker_cnt):
         case "in":
             if worker_cnt>1:
                 print("scale in")
-                subprocess.run(["docker","compose","up","--scale",f"spark-worker={worker_cnt-1}"])
+                subprocess.run(["docker","compose","up","-d","--scale",f"spark-worker={worker_cnt-1}"])
+                save_log("scale", f"in,{get_worker_cnt()+1},{get_worker_cnt()},{now()}")
+                #os.system(f"docker compose up --scale spark-worker={worker_cnt-1}")
             else:
                 print(f"최소 worker를 유지합니다.({get_min_cnt()})")
+                save_log("scale", f"in,{get_worker_cnt()},{get_worker_cnt()},{now()}")
         case "out":
             if worker_cnt<10:
                 print("scale out")
-                subprocess.run(["docker","compose","up","--scale",f"spark-worker={worker_cnt+1}"])
+                subprocess.run(["docker","compose","up","-d","--scale",f"spark-worker={worker_cnt+1}"])
+                save_log("scale", f"out,{get_worker_cnt()-1},{get_worker_cnt()},{now()}")
+                #os.system(f"docker compose up --scale spark-worker={worker_cnt+1}")
             else:
                 print(f"최대 worker를 유지합니다.({get_max_cnt()})")
+                save_log("scale", f"out,{get_worker_cnt()},{get_worker_cnt()},{now()}")
         case _:
             raise Exception("NotDefinedParameter")
 
@@ -111,23 +118,26 @@ def line_notify(msg):
     return response
 
 def save_log(path, data):
-    today=f"{datetime.now().year}{datetime.now().month}{datetime.now().day}"
-    log_path=f"{pwd}/{path}"
-    log_file_path=f"{log_path}/log_{today}.log"
+    #today=f"{datetime.now().year}{datetime.now().month}{datetime.now().day}"
+    today=now("%Y%m%d")
+    log_path=f"{pwd}/log/{path}"
+    log_file_path=f"{log_path}/{today}.log"
 
-    os.makedir(log_path, exist_ok=True)
+    os.makedirs(log_path, exist_ok=True)
 
     if os.path.exists(log_file_path)!=True:
-        f=open(log_file_path)
+        f=open(log_file_path,"w")
         match path:
             case "scale":
-                f.write("method,cnt_before,cnt_after,time")
+                f.write("method,cnt_before,cnt_after,time\n")
             case "usage":
-                f.write("cpu_use,cnt_curr,time,status")
+                f.write("cpu_use,cnt_curr,time,status\n")
             case _:
                 raise Exception("NotDefinedParameter")
         f.close()
 
     with open(log_file_path,"a") as f:
-        f.write(data)
+        f.write(f"{data}\n")
     return "success"
+
+get_log_path=lambda :f"{pwd}/log"

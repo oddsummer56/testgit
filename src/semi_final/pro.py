@@ -33,7 +33,7 @@ producer = create_kafka_producer()
 # 예시 크롤링 데이터 (티켓 사이트에서 크롤링했다고 가정)
 def fetch_ticket_data():
     return {
-        'event_name': 'Concert ham',
+        'event_name': 'Concert ham test',
         'price': 100,
         'date': '2024-12-01',
         'location': 'City Hall',

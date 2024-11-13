@@ -1,6 +1,6 @@
 services:
   kafka1:
-    image: bitnami/kafka:latest
+    image: bitnami/kafka:3.1.0
     container_name: kafka1
     environment:
       - KAFKA_BROKER_ID=1
@@ -8,18 +8,24 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka1:9092
-      - KAFKA_CFG_MIN_INSYNC_REPLICAS=2
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=1
     ports:
       - "9092:9092"
     depends_on:
       - zookeeper1
       - zookeeper2
       - zookeeper3
+    restart: on-failure
     networks:
       - kafka_network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'        # 필요한 경우 적절한 CPU 수 할당
+          memory: '4G'     # 메모리 할당
 
   kafka2:
-    image: bitnami/kafka:latest
+    image: bitnami/kafka:3.1.0
     container_name: kafka2
     environment:
       - KAFKA_BROKER_ID=2
@@ -27,18 +33,24 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9093
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka2:9093
-      - KAFKA_CFG_MIN_INSYNC_REPLICAS=2
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=1
     ports:
       - "9093:9093"
     depends_on:
       - zookeeper1
       - zookeeper2
       - zookeeper3
+    restart: on-failure
     networks:
       - kafka_network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'        # 필요한 경우 적절한 CPU 수 할당
+          memory: '4G'     # 메모리 할당
 
   kafka3:
-    image: bitnami/kafka:latest
+    image: bitnami/kafka:3.1.0
     container_name: kafka3
     environment:
       - KAFKA_BROKER_ID=3
@@ -46,47 +58,65 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9094
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka3:9094
-      - KAFKA_CFG_MIN_INSYNC_REPLICAS=2
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=1
     ports:
       - "9094:9094"
     depends_on:
       - zookeeper1
       - zookeeper2
       - zookeeper3
+    restart: on-failure
     networks:
       - kafka_network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'        # 필요한 경우 적절한 CPU 수 할당
+          memory: '4G'     # 메모리 할당
 
   zookeeper1:
-    image: bitnami/zookeeper:latest
+    image: bitnami/zookeeper:3.6.3
     container_name: zookeeper1
+    hostname: zookeeper1
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
       - ZOO_MY_ID=1
-      - ZOO_SERVERS=0.0.0.0:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
+        #- ZOO_SERVERS=zookeeper1:2888:3889;zookeeper2:2888:3889;zookeeper3:2888:3889
+      - ZOO_TICK_TIME=2000  # 2초
+      - ZOO_INIT_LIMIT=10   # 초기 연결 제한 시간
+      - ZOO_SYNC_LIMIT=5    # 동기화 제한 시간
     ports:
       - "2181:2181"
     networks:
       - kafka_network
 
   zookeeper2:
-    image: bitnami/zookeeper:latest
+    image: bitnami/zookeeper:3.6.3
     container_name: zookeeper2
+    hostname: zookeeper2
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
       - ZOO_MY_ID=2
-      - ZOO_SERVERS=zookeeper1:2888:3888;0.0.0.0:2888:3888;zookeeper3:2888:3888
+        #- ZOO_SERVERS=zookeeper1:2888:3889;zookeeper2:2888:3889;zookeeper3:2888:3889
+      - ZOO_TICK_TIME=2000  # 2초
+      - ZOO_INIT_LIMIT=10   # 초기 연결 제한 시간
+      - ZOO_SYNC_LIMIT=5    # 동기화 제한 시간
     ports:
       - "2182:2181"
     networks:
       - kafka_network
 
   zookeeper3:
-    image: bitnami/zookeeper:latest
+    image: bitnami/zookeeper:3.6.3
     container_name: zookeeper3
+    hostname: zookeeper3
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
       - ZOO_MY_ID=3
-      - ZOO_SERVERS=zookeeper1:2888:3888;zookeeper2:2888:3888;0.0.0.0:2888:3888
+        #- ZOO_SERVERS=zookeeper1:2888:3889;zookeeper2:2888:3889;zookeeper3:2888:3889
+      - ZOO_TICK_TIME=2000  # 2초
+      - ZOO_INIT_LIMIT=10   # 초기 연결 제한 시간
+      - ZOO_SYNC_LIMIT=5    # 동기화 제한 시간
     ports:
       - "2183:2181"
     networks:

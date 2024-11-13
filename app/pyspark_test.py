@@ -23,7 +23,7 @@ filtered_df = df.filter(col("Age") >= 30)
 print("나이가 30 이상인 사람들:")
 filtered_df.show()
 
-time.sleep(600)
+time.sleep(6000)
 
 # SparkSession 종료
 spark.stop()

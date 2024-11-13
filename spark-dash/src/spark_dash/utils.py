@@ -15,7 +15,7 @@ pwd = os.path.dirname(os.path.abspath(__file__))
 # X 에 대한 값을 설정 파일을 통해 읽어 오기
 def get_config():
     cp = ConfigParser()
-    cp.read(f"{pwd}/config.ini")
+    cp.read(f"{pwd}/conf/config.ini")
 
     config=dict()
     for i in cp:
@@ -26,25 +26,25 @@ def get_config():
 
 def get_max_cpu_use():
     cp = ConfigParser()
-    cp.read(f"{pwd}/config.ini")
+    cp.read(f"{pwd}/conf/config.ini")
 
     return float(cp["limit"]["max_cpu_use"])
 
 def get_min_cpu_use():
     cp = ConfigParser()
-    cp.read(f"{pwd}/config.ini")
+    cp.read(f"{pwd}/conf/config.ini")
 
     return float(cp["limit"]["min_cpu_use"])
 
 def get_max_cnt():
     cp = ConfigParser()
-    cp.read(f"{pwd}/config.ini")
+    cp.read(f"{pwd}/conf/config.ini")
 
     return float(cp["scale"]["max_cnt"])
 
 def get_min_cnt():
     cp = ConfigParser()
-    cp.read(f"{pwd}/config.ini")
+    cp.read(f"{pwd}/conf/config.ini")
 
     return float(cp["scale"]["min_cnt"])
 
@@ -80,7 +80,7 @@ def do_scale(method,worker_cnt):
         case "in":
             if worker_cnt>1:
                 print("scale in")
-                subprocess.run(["docker","compose","up","-d","--scale",f"spark-worker={worker_cnt-1}"])
+                subprocess.run(["docker","compose","-f",f"{pwd}/conf/docker-compose.yml","up","-d","--scale",f"spark-worker={worker_cnt-1}"])
                 save_log("scale", f"in,{get_worker_cnt()+1},{get_worker_cnt()},{now()}")
                 #os.system(f"docker compose up --scale spark-worker={worker_cnt-1}")
             else:
@@ -89,7 +89,7 @@ def do_scale(method,worker_cnt):
         case "out":
             if worker_cnt<10:
                 print("scale out")
-                subprocess.run(["docker","compose","up","-d","--scale",f"spark-worker={worker_cnt+1}"])
+                subprocess.run(["docker","compose","-f",f"{pwd}/conf/docker-compose.yml","up","-d","--scale",f"spark-worker={worker_cnt+1}"])
                 save_log("scale", f"out,{get_worker_cnt()-1},{get_worker_cnt()},{now()}")
                 #os.system(f"docker compose up --scale spark-worker={worker_cnt+1}")
             else:

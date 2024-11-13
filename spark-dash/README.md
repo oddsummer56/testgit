@@ -1,5 +1,8 @@
 # spark-dash
 
+### Pypi
+- [spark-dash](https://pypi.org/project/spark-dash/)
+
 ### usage
 1. Run streamlit 
 ```
@@ -40,6 +43,18 @@ $ run-dashboard
       > 
       > d. 선택된 log file에서 현재 CPU 사용상태를 bar plot으로 표출
 
+### Configure
+```bash
+$ cat config.ini
+[limit]
+max_cpu_use=1   # 10%
+min_cpu_use=1   # 10%
+
+[scale]
+min_cnt=1
+max_cnt=10
+```
+> scale in/out이 일어나는 cpu %와 최대/최소 worker의 갯수를 `config.ini` 파일에 지정 
 
 ### dependency
 ![streamlit>=1.40.1](https://img.shields.io/badge/streamlit>=1.40.1-FF4B4B.svg?style=for-the-badge&logo=streamlit&logoColor=FFFFFF) <br/>

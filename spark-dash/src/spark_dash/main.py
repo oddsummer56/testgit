@@ -9,6 +9,7 @@ from tz_kst import now
 
 def list2df():
     l = docker_stats()
+    l = list(filter(lambda x:"spark" in x["Name"],l))
     df = pd.DataFrame(l)
 
     df.set_index("Name", inplace=True)

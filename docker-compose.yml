@@ -64,7 +64,16 @@ services:
       - "/app/pyspark_test.py"  # 실행할 PySpark 스크립트 파일 경로를 지정
     ports:
       - "4040:4040"
-  
+      
+  node-exporter:
+      image: prom/node-exporter:v1.0.1
+      container_name: node-exporter
+      ports:
+          - 9100:9100
+      restart: unless-stopped
+      networks:
+          - spark-net
+
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus

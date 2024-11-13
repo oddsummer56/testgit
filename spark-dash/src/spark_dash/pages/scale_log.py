@@ -19,7 +19,7 @@ st.markdown("### Scale Log DataFrame")
 df = pd.read_csv(f"{log_path}/{option}")
 df
 
-st.markdown("### Scale Count Flow")
+st.markdown(f"### \# of Worker Plot")
 
 scale_cnt=df["cnt_after"].to_list()
 scale_cnt.insert(0,int(df["cnt_before"][0]))
@@ -28,7 +28,7 @@ time_list=df["time"].to_list()
 time_list.insert(0,df["time"][0])
 
 fig, ax  = plt.subplots()
-ax.set_ylabel("CPU scale(%)")
+ax.set_ylabel("# of Worker")
 ax.plot(time_list,scale_cnt)
 plt.setp(ax.get_xticklabels(), rotation=35, ha="right")
 

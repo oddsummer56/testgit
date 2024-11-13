@@ -8,9 +8,20 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka1:9092
-      - KAFKA_CFG_MIN_INSYNC_REPLICAS=1
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=3
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
+      - KAFKA_REPLICATION_FACTOR=3 #복제본 수 설정
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=2
     ports:
       - "9092:9092"
+    deploy:
+      resources:
+        limits:
+          memory: "16G"
+          cpus: "4"
+        reservations:
+          memory: "8G"
+          cpus: "2"
     depends_on:
       - zookeeper1
       - zookeeper2
@@ -18,11 +29,6 @@ services:
     restart: on-failure
     networks:
       - kafka_network
-    deploy:
-      resources:
-        limits:
-          cpus: '2'        # 필요한 경우 적절한 CPU 수 할당
-          memory: '4G'     # 메모리 할당
 
   kafka2:
     image: bitnami/kafka:3.1.0
@@ -33,9 +39,20 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9093
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka2:9093
-      - KAFKA_CFG_MIN_INSYNC_REPLICAS=1
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=3
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
+      - KAFKA_REPLICATION_FACTOR=3  # 복제본 수 설정
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=2
     ports:
       - "9093:9093"
+    deploy:
+      resources:
+        limits:
+          memory: "16G"
+          cpus: "4"
+        reservations:
+          memory: "8G"
+          cpus: "2"
     depends_on:
       - zookeeper1
       - zookeeper2
@@ -43,11 +60,6 @@ services:
     restart: on-failure
     networks:
       - kafka_network
-    deploy:
-      resources:
-        limits:
-          cpus: '2'        # 필요한 경우 적절한 CPU 수 할당
-          memory: '4G'     # 메모리 할당
 
   kafka3:
     image: bitnami/kafka:3.1.0
@@ -58,9 +70,20 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9094
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka3:9094
-      - KAFKA_CFG_MIN_INSYNC_REPLICAS=1
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=3
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
+      - KAFKA_REPLICATION_FACTOR=3  # 복제본 수 설정
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=2
     ports:
       - "9094:9094"
+    deploy:
+      resources:
+        limits:
+          memory: "16G"
+          cpus: "4"
+        reservations:
+          memory: "8G"
+          cpus: "2"
     depends_on:
       - zookeeper1
       - zookeeper2
@@ -68,12 +91,7 @@ services:
     restart: on-failure
     networks:
       - kafka_network
-    deploy:
-      resources:
-        limits:
-          cpus: '2'        # 필요한 경우 적절한 CPU 수 할당
-          memory: '4G'     # 메모리 할당
-
+  
   zookeeper1:
     image: bitnami/zookeeper:3.6.3
     container_name: zookeeper1

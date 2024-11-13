@@ -4,13 +4,12 @@ services:
     image: apache/spark:latest  
     container_name: spark-master
     hostname: spark-master
-    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master  
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master  # saprk master 실행
     environment:  
       - SPARK_MASTER_HOST=spark-master
       - SPARK_DRIVER_MEMORY=1G  # 마스터의 메모리를 1GB로 설정
-      - TZ=Asia/Seoul
     volumes:
-      - ./metrics.properties:/opt/spark/conf/metrics.properties
+      - ./metrics.properties:/opt/spark/conf/metrics.properties # 메트릭 수집시스템과 연동
     ports:
       - "8080:8080"  # 로컬 포트 8080을 컨테이너의 포트 8080과 연결 (Spark Web UI)
       - "7077:7077"  # 로컬 포트 7077을 컨테이너의 포트 7077과 연결 (Spark 마스터 포트)
@@ -24,7 +23,6 @@ services:
       - SPARK_MASTER=spark://spark-master:7077
       - SPARK_WORKER_CORES=1  # 워커가 사용할 CPU 코어 수를 1개로 제한
       - SPARK_WORKER_MEMORY=1G  # 워커가 사용할 메모리를 1GB로 제한
-      - TZ=Asia/Seoul
     depends_on:
       - spark-master  # spark-master 서비스가 먼저 시작되도록 지정
     networks:
@@ -32,11 +30,10 @@ services:
     deploy:
       replicas: 3  # 워커의 수를 3개로 설정 (스케일 조정 가능)
 
+
   spark-submit:  # Spark Submit 서비스 정의
     image: apache/spark:latest
     container_name: spark-submit
-    environment:
-      - TZ=Asia/Seoul
     networks:
       - spark-net  # 'spark-net' 네트워크에 연결하여 Spark 클러스터 내부 통신
     depends_on:
@@ -44,7 +41,7 @@ services:
       - spark-worker
     volumes:
       - ./app:/app  # 로컬 디렉토리 'app'을 컨테이너의 '/app' 경로에 연결하여 PySpark 스크립트를 사용할 수 있게 설정
-      - ./metrics.properties:/opt/spark/conf/metrics.properties
+      - ./metrics.properties:/opt/spark/conf/metrics.properties # 메트릭 수집 시스템과 연동
     entrypoint:  # 컨테이너가 시작될 때 자동으로 실행할 명령어 지정
       - "/opt/spark/bin/spark-submit"
       - "--master"
@@ -70,12 +67,10 @@ services:
     container_name: prometheus
     ports:
       - "9090:9090"  # Prometheus Web UI
-    environment:
-      - TZ=Asia/Seoul
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml  # Prometheus 설정 파일
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml  # Prometheus 설정 파일 컨테이너로 마운트
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--config.file=/etc/prometheus/prometheus.yml' # 명시적으로 설정파일 경로 지정하여 혼동 방지
     networks:
       - spark-net  # 동일한 네트워크
     restart: always
@@ -86,7 +81,6 @@ services:
     container_name: grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin  # Grafana 관리자 비밀번호
-      - TZ=Asia/Seoul # 호스트와 동일 시간대로 설정
     ports:
       - "3000:3000"  # Grafana Web UI
     depends_on:
@@ -95,6 +89,7 @@ services:
       - spark-net  # 동일한 네트워크
     restart: always
 
+
 networks:  # 서비스 간의 통신을 위한 네트워크 설정
   spark-net: # 네트워크 이름을 'spark-net'로 지정
-    external: true
+    external: true # 이미 생성되어 있는 외부 네트워크임을 지정, 다른 docker compose와도 네트워크 공유 가능

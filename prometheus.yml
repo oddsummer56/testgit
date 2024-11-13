@@ -7,9 +7,9 @@ scrape_configs:
       - targets: ["localhost:9090"]
 
   - job_name: "spark" # spark와 prometheus를 연결
-    metrics_path: "/metrics/master/prometheus"
+    metrics_path: "/metrics/master/prometheus" # metircs.properties 파일 경로 참조 
     static_configs:
-      - targets: ["spark-master:8080"]
+      - targets: ["spark-master:8080"] # 컨테이너이름:컨테이너포트
 
   - job_name: 'spark-driver'
     metrics_path: '/metrics/prometheus/'

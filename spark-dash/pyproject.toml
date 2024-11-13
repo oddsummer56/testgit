@@ -1,0 +1,19 @@
+[project]
+name = "spark-dash"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Mingk42", email = "xoals123456t@gmail.com"},
+]
+dependencies = [
+    "streamlit>=1.40.1",
+]
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "MIT"}
+
+[tool.pdm]
+distribution = false
+
+[tool.setuptools]
+package-dir = {"" = "src"}

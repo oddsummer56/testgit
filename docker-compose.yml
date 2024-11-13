@@ -12,6 +12,8 @@ services:
       - "7077:7077"  # 로컬 포트 7077을 컨테이너의 포트 7077과 연결 (Spark 마스터 포트)
     networks:
       - spark-net  # 'spark-net' 네트워크에 연결하여 Spark 클러스터 내부 통신
+    volumes:
+      - ./app:/app  # 로컬 디렉토리 'app'을 컨테이너의 '/app' 경로에 연결하여 PySpark 스크립트를 사용할 수 있게 설정
 
   spark-worker:  # Spark 워커 서비스 정의
     image: apache/spark:latest
@@ -25,31 +27,38 @@ services:
     networks:
       - spark-net  # 'spark-net' 네트워크에 연결하여 Spark 클러스터 내부 통신
     deploy:
-      replicas: 3  # 워커의 수를 3개로 설정 (스케일 조정 가능)
+      replicas: 1  # 워커의 수를 3개로 설정 (스케일 조정 가능)
+      resources:
+        reservations:
+          cpus: '0.01'
+          memory: 155M
+        limits:
+          cpus: '0.1'
+          memory: 200M
 
-  spark-submit:  # Spark Submit 서비스 정의
-    image: apache/spark:latest
-    container_name: spark-submit
-    networks:
-      - spark-net  # 'spark-net' 네트워크에 연결하여 Spark 클러스터 내부 통신
-    depends_on:
-      - spark-master
-      - spark-worker
-    volumes:
-      - ./app:/app  # 로컬 디렉토리 'app'을 컨테이너의 '/app' 경로에 연결하여 PySpark 스크립트를 사용할 수 있게 설정
-    entrypoint:  # 컨테이너가 시작될 때 자동으로 실행할 명령어 지정
-      - "/opt/spark/bin/spark-submit"
-      - "--master"
-      - "spark://spark-master:7077"  # Spark 마스터의 URL을 지정하여 Spark 클러스터 모드에서 실행
-      - "--conf"
-      - "spark.jars.ivy=/tmp/.ivy2"  # Ivy 캐시 경로를 /tmp/.ivy2로 설정하여 의존성 문제를 방지
-      - "--executor-memory"
-      - "512M"  # Executor 메모리를 512MB로 제한
-      - "--total-executor-cores"
-      - "1"  # 사용할 총 코어 수를 1개로 제한
-      - "--num-executors"
-      - "1"  # Executor의 수를 1개로 설정
-      - "/app/pyspark_test.py"  # 실행할 PySpark 스크립트 파일 경로를 지정
+            #  spark-submit:  # Spark Submit 서비스 정의
+            #    image: apache/spark:latest
+            #    container_name: spark-submit
+            #    networks:
+            #      - spark-net  # 'spark-net' 네트워크에 연결하여 Spark 클러스터 내부 통신
+            #    depends_on:
+            #      - spark-master
+            #      - spark-worker
+            #    volumes:
+    #   - ./app:/app  # 로컬 디렉토리 'app'을 컨테이너의 '/app' 경로에 연결하여 PySpark 스크립트를 사용할 수 있게 설정
+    # entrypoint:  # 컨테이너가 시작될 때 자동으로 실행할 명령어 지정
+    #   - "/opt/spark/bin/spark-submit"
+    #   - "--master"
+    #   - "spark://spark-master:7077"  # Spark 마스터의 URL을 지정하여 Spark 클러스터 모드에서 실행
+    #   - "--conf"
+    #   - "spark.jars.ivy=/tmp/.ivy2"  # Ivy 캐시 경로를 /tmp/.ivy2로 설정하여 의존성 문제를 방지
+    #   - "--executor-memory"
+    #   - "512M"  # Executor 메모리를 512MB로 제한
+    #   - "--total-executor-cores"
+    #   - "1"  # 사용할 총 코어 수를 1개로 제한
+    #   - "--num-executors"
+    #   - "1"  # Executor의 수를 1개로 설정
+    #   - "/app/pyspark_test.py"  # 실행할 PySpark 스크립트 파일 경로를 지정
 
 networks:  # 서비스 간의 통신을 위한 네트워크 설정
   spark-net:  # 네트워크 이름을 'spark-net'로 지정

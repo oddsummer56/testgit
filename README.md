@@ -9,6 +9,10 @@
 4. Kafka 컨슈머 (메시지를 소비하는 역할)
 <b></b>
 
+## 카프카 클러스터 구성
+<img width="1118" alt="스크린샷 2024-11-13 17 43 10" src="https://github.com/user-attachments/assets/efc0e822-e3a8-42a0-a8ef-acf3088b7792">
+<b></b>
+
 ## 요구사항
 - docker
 - docker compose

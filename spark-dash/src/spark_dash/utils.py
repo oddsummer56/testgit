@@ -2,7 +2,6 @@ import json
 import subprocess
 from configparser import ConfigParser
 import os
-from datetime import datetime
 from tz_kst import now
 
 

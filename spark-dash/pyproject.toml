@@ -15,6 +15,9 @@ requires-python = ">=3.11"
 readme = "README.md"
 license = {text = "MIT"}
 
+[project.scripts]
+run-dashboard="spark_dash.cmd:run"
+
 [tool.pdm]
 distribution = false
 

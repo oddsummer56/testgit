@@ -7,6 +7,6 @@ scrape_configs:
       - targets: ["localhost:9090"]
 
   - job_name: "spark" # spark와 prometheus를 연결
-    metrics_path: "/metrics/master/prometheus"
+    metric_path: "/metrics/master/prometheus"
     static_configs:
       - targets: ["spark-master:4040"]

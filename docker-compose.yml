@@ -3,18 +3,16 @@ services:
   spark-master:  # Spark 마스터 서비스 정의
     image: apache/spark:latest  
     container_name: spark-master
-    command:
-      - "/bin/sh"
-      - "-c"
-      - "/opt/spark/bin/spark-class org.apache.spark.deploy.master.Master && --conf spark.metrics.conf.*.sink.prometheusServlet.class=org.apache.spark.metrics.sink.PrometheusServlet && --conf spark.metrics.conf.*.sink.prometheusServlet.path=/metrics/prometheus && --conf spark.metrics.conf.*.sink.prometheusServlet.port=4041"
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master  
     environment:  
       - SPARK_MASTER_HOST=spark-master
       - SPARK_DRIVER_MEMORY=1G  # 마스터의 메모리를 1GB로 설정
       - TZ=Asia/Seoul
+    volumes:
+      - ./metrics.properties:/opt/spark/conf/metrics.properties
     ports:
       - "8080:8080"  # 로컬 포트 8080을 컨테이너의 포트 8080과 연결 (Spark Web UI)
       - "7077:7077"  # 로컬 포트 7077을 컨테이너의 포트 7077과 연결 (Spark 마스터 포트)
-      - "4041:4041"  # 로컬 포트 4040을 컨테이너의 포트 4040과 연결 (soark metric port)
       - "4040:4040"  # 로컬 포트 4040을 컨테이너의 포트 4040과 연결 (soark metric port)
     networks:
       - spark-net
@@ -46,15 +44,19 @@ services:
       - spark-worker
     volumes:
       - ./app:/app  # 로컬 디렉토리 'app'을 컨테이너의 '/app' 경로에 연결하여 PySpark 스크립트를 사용할 수 있게 설정
-
+      - ./metrics.properties:/opt/spark/conf/metrics.properties
     entrypoint:  # 컨테이너가 시작될 때 자동으로 실행할 명령어 지정
       - "/opt/spark/bin/spark-submit"
       - "--master"
       - "spark://spark-master:7077"  # Spark 마스터의 URL을 지정하여 Spark 클러스터 모드에서 실행
-        #- "--conf"
       - "--conf"
-      - " spark.ui.prometheus.enabled=true"
-        #- "spark.jars.ivy=/tmp/.ivy2"  # Ivy 캐시 경로를 /tmp/.ivy2로 설정하여 의존성 문제를 방지
+      - "spark.jars.ivy=/tmp/.ivy2"  # Ivy 캐시 경로를 /tmp/.ivy2로 설정하여 의존성 문제를 방지
+      - "--conf"
+      - "spark.ui.port=4040"
+        #- "--conf"
+        #- "spark.metrics.conf=/opt/spark/conf/metrics.properties" # 메트릭스 수집을 위해 옵션 추가
+        #- "--files"
+        #- "/opt/spark/conf/metrics.properties"
       - "--executor-memory"
       - "512M"  # Executor 메모리를 512MB로 제한
       - "--total-executor-cores"
@@ -85,7 +87,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin  # Grafana 관리자 비밀번호
       - TZ=Asia/Seoul # 호스트와 동일 시간대로 설정
     ports:
-      - "3001:3000"  # Grafana Web UI
+      - "3000:3000"  # Grafana Web UI
     depends_on:
       - prometheus
     networks:
@@ -94,4 +96,4 @@ services:
 
 networks:  # 서비스 간의 통신을 위한 네트워크 설정
   spark-net: # 네트워크 이름을 'spark-net'로 지정
-    driver: bridge
+    external: true

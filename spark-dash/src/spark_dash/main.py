@@ -31,11 +31,12 @@ row4 = st.empty()
 if l.button("scale in"):
     do_scale("in",get_worker_cnt())
     line_notify(f"worker의 수를 {get_worker_cnt()}개로 scale in하였습니다.")
+    st.session_state["lowTime"]=0
     st.rerun()
 if r.button("scale out"):
     do_scale("out",get_worker_cnt())
     print(line_notify(f"worker의 수를 {get_worker_cnt()}개로 scale out하였습니다."))
-
+    st.session_state["highTime"]=0
     st.rerun()
 
 

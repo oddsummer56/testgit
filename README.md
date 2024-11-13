@@ -17,9 +17,9 @@ docker compose version
 - app 폴더에 실행할 PySpark 스크립트 (app/pyspark_test.py)
 
 ## 사용법
-1.  Docker Compose로 Spark 클러스터 시작
+1.  Docker Compose로 Spark 클러스터 빌드 및 시작
 ```
-docker compose up -d
+docker compose up -d --build
 ```
 
 2. Spark Web UI 확인  
@@ -36,5 +36,5 @@ docker compose down
 ```
 3. Spark 클러스터 다시 시작
 ```
-dockercompose up -d
+docker compose up -d
 ```
